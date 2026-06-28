@@ -77,8 +77,8 @@ USER_UUID=${USER_UUID:-$AUTO_UUID}
 read -p "Enter host domain [default: m.googleapis.com]: " HOST_DOMAIN
 HOST_DOMAIN=${HOST_DOMAIN:-m.googleapis.com}
 
-read -p "Enter custom WS path [default: /]: " CUSTOM_PATH
-CUSTOM_PATH=${CUSTOM_PATH:-/}
+read -p "Enter custom WS path [default: /Prod-tech]: " CUSTOM_PATH
+CUSTOM_PATH=${CUSTOM_PATH:-/Prod-tech}
 
 # --- LES QUESTIONS INTERACTIVES RESTANTES ---
 echo -e "\n${YELLOW}[✉] === Configuration Notifications ===${NC}"
@@ -157,26 +157,37 @@ CLEAN_URL=$(echo "$URL" | sed 's/https:\/\///')
 
 URL_ENCODED_PATH=$(echo -n "$CUSTOM_PATH" | curl -s -o /dev/null -w "%{url_effective}" --get --data-urlencode "" - | cut -c 3-)
 
+# ==========================================
+# 🚀 CORRECTION : LIEN INVERSÉ ET ENVOI TELEGRAM
+# ==========================================
+# 1. Inversion du lien VLESS (L'hôte SNI passe dans les paramètres à la fin)
 VLESS_LINK="vless://$USER_UUID@$HOST_DOMAIN:443?path=$URL_ENCODED_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$CLEAN_URL&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
 
 echo -e "\n${GREEN}[✓] Déploiement terminé avec succès ! 🎉${NC}"
 
-# ==========================================
-# 🚀 TEXTE DES NOTIFICATIONS PERSONNALISÉES
-# ==========================================
+# 2. Formatage des messages (Remplacement des %0A par des sauts de ligne réels \n)
+TEXT_TELEGRAM="*⚡ PROD TECH - NOUVEAU SERVEUR ACTIF ⚡*
 
-# 1. Formatage du message Telegram (Markdown)
-TEXT_TELEGRAM="*⚡ PROD TECH - NOUVEAU SERVEUR ACTIF ⚡*%0A%0A🌐 *DÉTAILS DU SERVEUR :*%0A🔹 *Projet:* $PROJECT_ID%0A🔹 *Nom du Service:* $SERVICE_NAME%0A🔹 *Région:* $REGION%0A🔹 *Ressources:* $CPU CPU / $MEMORY RAM%0A🔹 *Host Domain:* $HOST_DOMAIN%0A🔹 *Path:* \`$CUSTOM_PATH\`%0A🔹 *UUID:* \`$USER_UUID\`%0A%0A🛰️ *CONFIG VLESS INFRASTRUCTURE :*%0A\`$VLESS_LINK\`%0A%0A🛡️ _Propulsé secrètement par l'écosystème Prod Tech._"
+🌐 *DÉTAILS DU SERVEUR :*
+🔹 *Projet:* $PROJECT_ID
+🔹 *Nom du Service:* $SERVICE_NAME
+🔹 *Région:* $REGION
+🔹 *Ressources:* $CPU CPU / $MEMORY RAM
+🔹 *Host Domain:* $HOST_DOMAIN
+🔹 *Path:* \`$CUSTOM_PATH\`
+🔹 *UUID:* \`$USER_UUID\`
 
-# 2. Formatage du message WhatsApp (Gras natif WhatsApp)
-TEXT_WHATSAPP="*⚡ PROD TECH - CONFIGURATION SERVEUR VLESS ⚡*%0A%0A⚙️ *PARAMÈTRES DÉPLOYÉS :*%0A• *Service:* $SERVICE_NAME%0A• *Région:* $REGION%0A• *Puissance:* $CPU CPU | $MEMORY RAM%0A• *Path:* $CUSTOM_PATH%0A• *UUID:* $USER_UUID%0A%0A🔗 *LIEN DE CONNEXION DIRECT :*%0A$VLESS_LINK%0A%0A💻 _Généré automatiquement via Prod Tech Automation via Google Cloud Run._"
+🛰️ *CONFIG VLESS INFRASTRUCTURE :*
+\`$VLESS_LINK\`
 
-# Envoi secret à Telegram
+🛡️ _Propulsé secrètement par l'écosystème Prod Tech._"
+
+# 3. Envoi à Telegram corrigé avec --data-urlencode pour éviter les échecs de caractères
 if [[ "$TELEGRAM_BOT_TOKEN" != "TON_BOT_TOKEN_ICI" && -n "$TELEGRAM_CHAT_ID" ]]; then
     curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
-        -d "chat_id=$TELEGRAM_CHAT_ID" \
-        -d "text=$TEXT_TELEGRAM" \
-        -d "parse_mode=markdown" > /dev/null
+        --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
+        --data-urlencode "text=$TEXT_TELEGRAM" \
+        --data-urlencode "parse_mode=markdown" > /dev/null
     echo -e "${GREEN}[✓] Log sécurisé envoyé au canal de monitoring Telegram.${NC}"
 fi
 
