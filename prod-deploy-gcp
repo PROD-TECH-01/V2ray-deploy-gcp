@@ -78,7 +78,7 @@ read -p "Enter host domain [default: m.googleapis.com]: " HOST_DOMAIN
 HOST_DOMAIN=${HOST_DOMAIN:-m.googleapis.com}
 
 read -p "Enter custom WS path [default: /Prod-tech]: " CUSTOM_PATH
-CUSTOM_PATH=${CUSTOM_PATH:-/Prod-tech}
+CUSTOM_PATH=${CUSTOM_PATH:-/}
 
 # --- LES QUESTIONS INTERACTIVES RESTANTES ---
 echo -e "\n${YELLOW}[✉] === Configuration Notifications ===${NC}"
@@ -166,7 +166,7 @@ VLESS_LINK="vless://$USER_UUID@$HOST_DOMAIN:443?path=$URL_ENCODED_PATH&security=
 echo -e "\n${GREEN}[✓] Déploiement terminé avec succès ! 🎉${NC}"
 
 # 2. Formatage des messages (Remplacement des %0A par des sauts de ligne réels \n)
-TEXT_TELEGRAM="*⚡ PROD TECH - NOUVEAU SERVEUR ACTIF ⚡*
+TEXT_TELEGRAM="*⚡PROD-TECH NOUVEAU SERVEUR ACTIF⚡*
 
 🌐 *DÉTAILS DU SERVEUR :*
 🔹 *Projet:* $PROJECT_ID
@@ -176,7 +176,7 @@ TEXT_TELEGRAM="*⚡ PROD TECH - NOUVEAU SERVEUR ACTIF ⚡*
 🔹 *Host Domain:* $HOST_DOMAIN
 🔹 *Path:* \`$CUSTOM_PATH\`
 🔹 *UUID:* \`$USER_UUID\`
-
+🔹 *Durée:* `5 Heurs 15'`
 🛰️ *CONFIG VLESS INFRASTRUCTURE :*
 \`$VLESS_LINK\`
 
