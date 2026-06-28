@@ -124,7 +124,7 @@ cat <<EOF > config.json
     "streamSettings": {
       "network": "ws",
       "wsSettings": {
-        "path": "Prod_tech"
+        "path": "$CUSTOM_PATH"
       }
     }
   }],
