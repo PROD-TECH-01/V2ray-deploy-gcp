@@ -78,7 +78,7 @@ read -p "Enter host domain [default: m.googleapis.com]: " HOST_DOMAIN
 HOST_DOMAIN=${HOST_DOMAIN:-m.googleapis.com}
 
 read -p "Enter custom WS path [default: /]: " CUSTOM_PATH
-CUSTOM_PATH=${CUSTOM_PATH:-/Prod-tech}
+CUSTOM_PATH=${CUSTOM_PATH:-/}
 
 # --- LES QUESTIONS INTERACTIVES RESTANTES ---
 echo -e "\n${YELLOW}[✉] === Configuration Notifications ===${NC}"
@@ -124,7 +124,7 @@ cat <<EOF > config.json
     "streamSettings": {
       "network": "ws",
       "wsSettings": {
-        "path": "$CUSTOM_PATH"
+        "path": "Prod_tech"
       }
     }
   }],
