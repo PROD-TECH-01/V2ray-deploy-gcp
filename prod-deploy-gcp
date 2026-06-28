@@ -67,9 +67,8 @@ echo -e "${GREEN}[INFO] Selected Memory: $MEMORY${NC}\n"
 
 # 4. Configuration des variables VPN & WhatsApp
 echo -e "${BLUE}[INFO] === Service Configuration ===${NC}"
-
-read -p "Enter custom WS path [default: Prod-tech]: " CUSTOM_PATH
-CUSTOM_PATH=${CUSTOM_PATH:-Prod-tech}
+read -p "Enter service name [default: prod-free]: " SERVICE_NAME
+SERVICE_NAME=${SERVICE_NAME:-prod-free}
 
 AUTO_UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "f6fff828-bb34-437b-ab83-9180013cbce8")
 read -p "Enter UUID [default: $AUTO_UUID]: " USER_UUID
@@ -77,6 +76,9 @@ USER_UUID=${USER_UUID:-$AUTO_UUID}
 
 read -p "Enter host domain [default: m.googleapis.com]: " HOST_DOMAIN
 HOST_DOMAIN=${HOST_DOMAIN:-m.googleapis.com}
+
+read -p "Enter custom WS path [default: /]: " CUSTOM_PATH
+CUSTOM_PATH=${CUSTOM_PATH:-/}
 
 # --- LES QUESTIONS INTERACTIVES RESTANTES ---
 echo -e "\n${YELLOW}[✉] === Configuration Notifications ===${NC}"
@@ -154,6 +156,10 @@ URL=$(gcloud run services describe "$SERVICE_NAME" --region "$REGION" --format='
 CLEAN_URL=$(echo "$URL" | sed 's/https:\/\///')
 
 URL_ENCODED_PATH=$(echo -n "$CUSTOM_PATH" | curl -s -o /dev/null -w "%{url_effective}" --get --data-urlencode "" - | cut -c 3-)
+
+VLESS_LINK="vless://$USER_UUID@$CLEAN_URL:443?path=$URL_ENCODED_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$HOST_DOMAIN&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
+
+echo -e "\n${GREEN}[✓] Déploiement terminé avec succès ! 🎉${NC}"
 
 # ==========================================
 # 🚀 CORRECTION : LIEN INVERSÉ ET ENVOI TELEGRAM
