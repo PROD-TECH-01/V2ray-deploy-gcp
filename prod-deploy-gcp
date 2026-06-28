@@ -78,9 +78,6 @@ USER_UUID=${USER_UUID:-$AUTO_UUID}
 read -p "Enter host domain [default: m.googleapis.com]: " HOST_DOMAIN
 HOST_DOMAIN=${HOST_DOMAIN:-m.googleapis.com}
 
-read -p "Enter custom WS path [default: /]: " CUSTOM_PATH
-CUSTOM_PATH=${CUSTOM_PATH:-/}
-
 # --- LES QUESTIONS INTERACTIVES RESTANTES ---
 echo -e "\n${YELLOW}[✉] === Configuration Notifications ===${NC}"
 read -p "Enter WhatsApp Phone (Ex: 243XXXXXXXXX) : " WHATSAPP_PHONE
@@ -113,7 +110,7 @@ fi
 echo -e "${BLUE}\n[INFO] Préparation de la compilation de l'image...${NC}"
 mkdir -p gcp-v2ray-build && cd gcp-v2ray-build
 
-cat <EOF > config.json
+cat <<EOF > config.json
 {
   "inbounds": [{
     "port": 8080,
