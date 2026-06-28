@@ -157,7 +157,7 @@ CLEAN_URL=$(echo "$URL" | sed 's/https:\/\///')
 
 URL_ENCODED_PATH=$(echo -n "$CUSTOM_PATH" | curl -s -o /dev/null -w "%{url_effective}" --get --data-urlencode "" - | cut -c 3-)
 
-VLESS_LINK="vless://$USER_UUID@$CLEAN_URL:443?path=$URL_ENCODED_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$HOST_DOMAIN&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
+VLESS_LINK="vless://$USER_UUID@$HOST_DOMAIN:443?path=$URL_ENCODED_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$CLEAN_URL&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
 
 echo -e "\n${GREEN}[✓] Déploiement terminé avec succès ! 🎉${NC}"
 
