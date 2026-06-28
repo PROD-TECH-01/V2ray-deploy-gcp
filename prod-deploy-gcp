@@ -67,8 +67,9 @@ echo -e "${GREEN}[INFO] Selected Memory: $MEMORY${NC}\n"
 
 # 4. Configuration des variables VPN & WhatsApp
 echo -e "${BLUE}[INFO] === Service Configuration ===${NC}"
-read -p "Enter service name [default: prod-free]: " SERVICE_NAME
-SERVICE_NAME=${SERVICE_NAME:-prod-free}
+
+read -p "Enter custom WS path [default: Prod-tech]: " CUSTOM_PATH
+CUSTOM_PATH=${CUSTOM_PATH:-Prod-tech}
 
 AUTO_UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "f6fff828-bb34-437b-ab83-9180013cbce8")
 read -p "Enter UUID [default: $AUTO_UUID]: " USER_UUID
@@ -112,7 +113,7 @@ fi
 echo -e "${BLUE}\n[INFO] Préparation de la compilation de l'image...${NC}"
 mkdir -p gcp-v2ray-build && cd gcp-v2ray-build
 
-cat <<EOF > config.json
+cat <EOF > config.json
 {
   "inbounds": [{
     "port": 8080,
